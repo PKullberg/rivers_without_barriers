@@ -1,0 +1,46 @@
+---
+title: "Rivers_without_barriers"
+author: "peter kullberg"
+date: "18 3 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(sf)
+library(mapview)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(cowplot)
+```
+
+
+```{r proportions, include = FALSE}
+## Create a pie plot showing the proportions
+result_table <- read_csv("../outputs/river_lengths.csv") %>% mutate(type = factor(accessibility, levels = c("free", "through_fisway", "fisway_and_partial", "blocked")))
+
+availability_plot <- ggplot(result_table, aes(x="", y = pr_tot, fill = type))+
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar("y", start=0) +
+  scale_fill_manual(values=c("#0070c0", "#7bba31",  "#ffff00", "#dbcdab"), labels = c("Free-flowing", "Infered", "Fishway", "Blocked")) +
+  ggtitle("A) Riverbeds available for fish migration") + 
+  theme(legend.position = "bottom", axis.text.x=element_blank(), axis.title.x=element_blank(), axis.title.y=element_blank(), axis.ticks.y=element_blank(), legend.title = element_blank())
+
+# create a pie plot showing dam types. Unlike in biodiversity.fi this is shown only for one year and using pie chart
+dam_types <- read_csv("../outputs/barrier_types.csv")
+
+# The unknown type is not reported in the original. Should chekc how they were treated.
+barrier_types_plot <- ggplot(dam_types, aes(x="", y = pr_tot, fill = type))+
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar("y", start=0) + 
+  scale_fill_manual(values=c("#0070c0", "#7bba31",  "#ffff00", "#dbcdab"), labels = c("Unknown", "Fishway", "Infered", "Blocked")) +
+  ggtitle("B) Types of migration barriers in 2021") + 
+  theme(legend.position = "bottom", axis.text.x=element_blank(), axis.title.x=element_blank(), axis.title.y=element_blank(), axis.ticks.y=element_blank(), legend.title = element_blank())
+
+```
+
+```{r plot, echo = FALSE, message = FALSE, warning = FALSE}
+plot_grid(availability_plot, barrier_types_plot)
+```
+
